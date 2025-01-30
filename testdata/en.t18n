@@ -1,0 +1,8 @@
+# If key not found in en-GB/en-US it will be taken from this file.
+
+Save=Save
+Cancel=Cancel
+Delete=Delete
+
+# Exit declared in the en file only.
+Exit=Sign out

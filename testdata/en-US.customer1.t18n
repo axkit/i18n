@@ -1,0 +1,4 @@
+# if resourse is requested within namespace customer1
+# the word Hoist will be taken. 
+
+Lift=Hoist
