@@ -5,53 +5,55 @@ import (
 	"sync"
 )
 
-// LangIndex is index of the language in the slice of language codes.
-type LangIndex int
+// Language is index of the language in the slice of language codes.
+type Language int
 
-// Unknown specifies that language code is not found.
-const Unknown LangIndex = -1
+// Unknown holds Language value for unknown language.
+const Unknown Language = -1
 
-// UnknownCode is used if language code is not found.
-var UnknownCode string = "?"
+// UnknownLanguageCode is used if Language is unknown.
+var UnknownLanguageCode string = "?"
 
 var (
+	// Global variables protected by mutex.
 	mux      sync.RWMutex //
 	codes    []string     // slice of language codes
-	nextCode []LangIndex  // index of the next language code in the hierarchy
+	nextCode []Language   // index of the next language code in the hierarchy
 )
 
 // String implements fmt.Stringer interface.
-func (li LangIndex) String() string {
-	return Code(li)
+func (li Language) String() string {
+	return code(li)
 }
 
-// Code returns language code by language index.
+// code returns language code by language index.
 // Returns UnknownCode variable if language index is invalid.
-func Code(li LangIndex) string {
+func code(li Language) string {
 	mux.RLock()
 	defer mux.RUnlock()
 	if int(li) >= len(codes) || li < 0 {
-		return UnknownCode
+		return UnknownLanguageCode
 	}
 	return codes[li]
 }
 
-// Index returns index of the language by language code.
+// Lookup returns Language by language code.
 // Returns Unknown if language code is not found.
-func Index(code string) LangIndex {
+func Lookup(code string) Language {
 	mux.RLock()
 	defer mux.RUnlock()
-	return getLangIndex(code)
+	return getLanguage(code)
 }
 
-// GetSetLangIndex parses language code and returns index of the language.
+// Parse parses language code and returns Language.
 // If language code is not found, it adds it.
-// If language code is complex, like zh-Hans-CN, than adds zh-Hans-CN, zh-Hans, zh.
-// Returns index of the first added language code.
-func GetSetLangIndex(code string) LangIndex {
+//
+// If language code is complex, like zh-Hans-CN, than adds zh-Hans-CN, zh-Hans, zh codes
+// and returns index of the first added Language.
+func Parse(code string) Language {
 
 	mux.RLock()
-	res := getLangIndex(code)
+	res := getLanguage(code)
 	mux.RUnlock()
 	if res != Unknown {
 		return res
@@ -75,9 +77,9 @@ func GetSetLangIndex(code string) LangIndex {
 	for i := len(parts) - 1; i >= 0; i-- {
 		next := Unknown
 		if i < len(parts)-1 {
-			next = getLangIndex(parts[i+1])
+			next = getLanguage(parts[i+1])
 		}
-		li, added := getSetLangIndex(parts[i])
+		li, added := getSetLanguage(parts[i])
 		if added {
 			nextCode[li] = next
 			res = li
@@ -87,33 +89,33 @@ func GetSetLangIndex(code string) LangIndex {
 	return res
 }
 
-// getLangIndex returns index of the language code.
-// Returns Unknown if language code is not found.
-func getLangIndex(code string) (li LangIndex) {
+// getLanguage returns Language by code.
+// Returns Unknown if code is not found.
+func getLanguage(code string) Language {
 	cnt := len(codes)
 	for i := 0; i < cnt; i++ {
 		if codes[i] == code {
-			return LangIndex(i)
+			return Language(i)
 		}
 	}
 	return Unknown
 }
 
-// getSetLangIndex returns index of the language code.
-// If language code is not found, it adds it.
-func getSetLangIndex(code string) (li LangIndex, added bool) {
+// getSetLanguage returns Language by language code.
+// If language code is not found, than adds it.
+func getSetLanguage(code string) (li Language, added bool) {
 
-	if li := getLangIndex(code); li != Unknown {
+	if li := getLanguage(code); li != Unknown {
 		return li, false
 	}
 
 	codes = append(codes, code)
 	nextCode = append(nextCode, Unknown)
-	return LangIndex(len(codes) - 1), true
+	return Language(len(codes) - 1), true
 }
 
-// LangCodes returns copy of the slice of language codes.
-func LangCodes() []string {
+// LanguageCodes returns copy of the slice of language codes.
+func LanguageCodes() []string {
 	mux.RLock()
 	defer mux.RUnlock()
 	res := make([]string, len(codes))
@@ -121,9 +123,17 @@ func LangCodes() []string {
 	return res
 }
 
-// NextLangIndex returns index of the next language code in the hierarchy.
+// LanguageCount returns last Language.
+// It is used to iterate over all registered languages.
+func LanguageCount() Language {
+	mux.RLock()
+	defer mux.RUnlock()
+	return Language(len(codes) - 1)
+}
+
+// NextLanguage returns index of the next language code in the hierarchy.
 // Returns Unknown if language index is invalid or is the last one (Unknown).
-func NextLangIndex(li LangIndex) LangIndex {
+func NextLanguage(li Language) Language {
 	mux.RLock()
 	defer mux.RUnlock()
 	if int(li) >= len(nextCode) || li < 0 {

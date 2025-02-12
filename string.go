@@ -29,15 +29,15 @@ func WithDefault(s string) StringOption {
 }
 
 // InLang returns string in language identified by code index.
-func (n String) InLang(li LangIndex, opts ...StringOption) string {
+func (n String) InLang(li Language, opts ...StringOption) string {
 
 	if len(n) == 0 || li < 0 {
-		return UnknownCode
+		return UnknownLanguageCode
 	}
 
 	for {
 		if int(li) >= len(n) {
-			li = NextLangIndex(li)
+			li = NextLanguage(li)
 		} else {
 			break
 		}
@@ -47,7 +47,7 @@ func (n String) InLang(li LangIndex, opts ...StringOption) string {
 		if NoFoundIndex != Unknown {
 			li = NoFoundIndex
 		} else {
-			return UnknownCode
+			return UnknownLanguageCode
 		}
 	}
 
@@ -57,7 +57,7 @@ func (n String) InLang(li LangIndex, opts ...StringOption) string {
 			return res
 		}
 
-		li = NextLangIndex(li)
+		li = NextLanguage(li)
 		if li != Unknown {
 			continue
 		}
@@ -88,7 +88,7 @@ func (n String) Bytes() []byte {
 		}
 		buffer.WriteString(sep)
 		buffer.WriteString(`"`)
-		buffer.WriteString(Code(LangIndex(li)))
+		buffer.WriteString(code(Language(li)))
 		buffer.WriteString(`":"`)
 		buffer.WriteString(val)
 		buffer.WriteString(`"`)
@@ -128,13 +128,13 @@ func ToString(b []byte) (String, error) {
 		return String{}, err
 	}
 
-	n := make(String, Len())
+	n := make(String, LanguageCount()+1)
 	for i := 0; i < len(n); i++ {
 		n[i] = emptyString
 	}
 
 	for code, val := range parsed {
-		li := int(GetSetLangIndex(code))
+		li := int(Parse(code))
 		if li >= len(n) {
 			x := li - len(n)
 			if x < 0 {
@@ -174,7 +174,7 @@ func (n *String) UnmarshalJSON(buf []byte) error {
 // StringValidator returns function that validates jsonb data for String type.
 func StringValidator() func([]byte) bool {
 
-	codes := LangCodes()
+	codes := LanguageCodes()
 	validCodes := make(map[string]struct{}, len(codes))
 	for _, code := range codes {
 		validCodes[code] = struct{}{}

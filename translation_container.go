@@ -16,7 +16,7 @@ const (
 )
 
 type key struct {
-	lang LangIndex
+	lang Language
 	// namespace holds suffix of the localization file. Format: en.{namespace}.t18n
 	// empty for default resource file, e.g.: en.t18n or en-US.t18n
 	namespace string
@@ -65,7 +65,7 @@ type FileStorager interface {
 	//Filenames(mask string, paths ...string) ([]string, error)
 	RegisteredFilenames() []string
 	ExtractFilename(fullname string) (string, error)
-	ParseFilename(filename string) (LangIndex, string)
+	ParseFilename(filename string) (Language, string)
 	ReadFile(filename string) ([]byte, error)
 }
 
@@ -80,7 +80,7 @@ type FileContentParser interface {
 type containerConfig struct {
 
 	// Default language is used if translation is not found in the requested language.
-	primaryLanguage LangIndex
+	primaryLanguage Language
 
 	// strategy defines a strategy for handling missing translations.
 	strategy TranslationRequestStrategy
@@ -99,7 +99,7 @@ type containerConfig struct {
 type ContainerOption func(o *containerConfig)
 
 // WithPrimaryLanguage assigns a primary language.
-func WithPrimaryLanguage(li LangIndex) ContainerOption {
+func WithPrimaryLanguage(li Language) ContainerOption {
 	return func(o *containerConfig) {
 		o.primaryLanguage = li
 	}

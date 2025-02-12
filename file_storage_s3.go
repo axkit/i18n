@@ -44,7 +44,7 @@ func (s *AmazonS3FileStorage) Filenames(mask string, paths ...string) ([]string,
 // Example:
 // ParseFileName("en.t18n") returns English, ""
 // ParseFileName("en.grid.t18n") returns English, "grid"
-func (lfr *AmazonS3FileStorage) ParseFileName(filename string) (li LangIndex, suffix string) {
+func (lfr *AmazonS3FileStorage) ParseFileName(filename string) (li Language, suffix string) {
 	from := strings.Index(filename, ".")
 	to := strings.LastIndex(filename, ".")
 	if from == -1 && to == -1 {
@@ -53,8 +53,8 @@ func (lfr *AmazonS3FileStorage) ParseFileName(filename string) (li LangIndex, su
 	}
 
 	if from == to {
-		return GetSetLangIndex(filename[0:from]), ""
+		return Parse(filename[0:from]), ""
 	}
 
-	return GetSetLangIndex(filename[0:from]), filename[from+1 : to]
+	return Parse(filename[0:from]), filename[from+1 : to]
 }

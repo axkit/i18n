@@ -69,13 +69,13 @@ func TestLocalFileStorage_ParseFilename(t *testing.T) {
 
 	tests := []struct {
 		filename       string
-		expectedLang   i18n.LangIndex
+		expectedLang   i18n.Language
 		expectedSuffix string
 	}{
-		{"en.t18n", i18n.GetSetLangIndex("en"), ""},
-		{"en-US.customer1.t18n", i18n.GetSetLangIndex("en-US"), "customer1"},
-		{"en-GB.t18n", i18n.GetSetLangIndex("en-GB"), ""},
-		{"de.customer2.t18n", i18n.GetSetLangIndex("de"), "customer2"},
+		{"en.t18n", i18n.Parse("en"), ""},
+		{"en-US.customer1.t18n", i18n.Parse("en-US"), "customer1"},
+		{"en-GB.t18n", i18n.Parse("en-GB"), ""},
+		{"de.customer2.t18n", i18n.Parse("de"), "customer2"},
 		{"invalidname", i18n.Unknown, ""},
 	}
 

@@ -8,9 +8,9 @@ import (
 func TestString(t *testing.T) {
 	resetLangState()
 
-	en := GetSetLangIndex("en")
-	fr := GetSetLangIndex("fr")
-	es := GetSetLangIndex("es")
+	en := Parse("en")
+	fr := Parse("fr")
+	es := Parse("es")
 
 	data := []byte(`{"en":"Hello","fr":"Bonjour"}`)
 	n, err := ToString(data)
@@ -32,19 +32,19 @@ func TestString(t *testing.T) {
 			t.Errorf("expected 'Bonjour', got '%s'", got)
 		}
 
-		if got := n.InLang(Unknown); got != UnknownCode {
-			t.Errorf("expected '%s', got '%s'", UnknownCode, got)
+		if got := n.InLang(Unknown); got != UnknownLanguageCode {
+			t.Errorf("expected '%s', got '%s'", UnknownLanguageCode, got)
 		}
 
-		if got := n.InLang(100); got != UnknownCode {
-			t.Errorf("expected '%s', got '%s'", UnknownCode, got)
+		if got := n.InLang(100); got != UnknownLanguageCode {
+			t.Errorf("expected '%s', got '%s'", UnknownLanguageCode, got)
 		}
 
-		if got := n.InLang(100, WithDefault("Hi")); got != UnknownCode {
-			t.Errorf("expected '%s', got '%s'", UnknownCode, got)
+		if got := n.InLang(100, WithDefault("Hi")); got != UnknownLanguageCode {
+			t.Errorf("expected '%s', got '%s'", UnknownLanguageCode, got)
 		}
 
-		if got := n.InLang(GetSetLangIndex("en-US")); got != "Hello" {
+		if got := n.InLang(Parse("en-US")); got != "Hello" {
 			t.Errorf("expected '%s', got '%s'", "Hello", got)
 		}
 
@@ -88,17 +88,18 @@ func TestString(t *testing.T) {
 	})
 
 	t.Run("ToString", func(t *testing.T) {
+
 	})
 
 }
 
-func ExampleFileLocalStorage() {
+func ExampleLocalFileStorage() {
 
 	// Init part
 
-	_ = GetSetLangIndex("en-US")
-	en := GetSetLangIndex("en")
-	de := GetSetLangIndex("de")
+	_ = Parse("en-US")
+	en := Parse("en")
+	de := Parse("de")
 
 	fs := NewLocalFileStorage()
 	if err := fs.RegisterFiles("*.t18n", "./testdata"); err != nil {
@@ -119,12 +120,12 @@ func ExampleFileLocalStorage() {
 
 	// API Request processing part
 	languageCodeFromHTTPRequest := "en-GB"
-	requestLi := Index(languageCodeFromHTTPRequest)
+	requestLi := Lookup(languageCodeFromHTTPRequest)
 
 	// get translation for the language code from the request
 	tr := tc.Lang(requestLi)
 
-	trn := tc.Namespace("customer1", Index("en-US"))
+	trn := tc.Namespace("customer1", Lookup("en-US"))
 
 	fmt.Println(tr.Value("%Lift%"))          // from ./testdata/en-GB.t18n
 	fmt.Println(tr.Value("%Save%"))          // from ./testdata/en.t18n

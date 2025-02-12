@@ -75,7 +75,7 @@ func (s *LocalFileStorage) RegisterFiles(mask string, paths ...string) error {
 // Example:
 // ParseFileName("en.t18n") returns English, ""
 // ParseFileName("en.grid.t18n") returns English, "grid"
-func (s *LocalFileStorage) ParseFilename(filename string) (li LangIndex, suffix string) {
+func (s *LocalFileStorage) ParseFilename(filename string) (li Language, suffix string) {
 	from := strings.Index(filename, ".")
 	to := strings.LastIndex(filename, ".")
 	if from == -1 && to == -1 {
@@ -84,8 +84,8 @@ func (s *LocalFileStorage) ParseFilename(filename string) (li LangIndex, suffix 
 	}
 
 	if from == to {
-		return GetSetLangIndex(filename[0:from]), ""
+		return Parse(filename[0:from]), ""
 	}
 
-	return GetSetLangIndex(filename[0:from]), filename[from+1 : to]
+	return Parse(filename[0:from]), filename[from+1 : to]
 }

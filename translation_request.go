@@ -8,13 +8,13 @@ import (
 
 // TranslationRequest is a request for a translation container in a specific language.
 type TranslationRequest struct {
-	lang      LangIndex
+	lang      Language
 	namespace string
 	tc        *TranslationContainer
 }
 
 // Lang returns a TranslationRequest in a specific language and default namespace.
-func (tc *TranslationContainer) Lang(li LangIndex) TranslationRequest {
+func (tc *TranslationContainer) Lang(li Language) TranslationRequest {
 	return TranslationRequest{
 		lang: li,
 		tc:   tc,
@@ -22,7 +22,7 @@ func (tc *TranslationContainer) Lang(li LangIndex) TranslationRequest {
 }
 
 // Namespace returns a TranslationRequest in a specific namespace.
-func (tc *TranslationContainer) Namespace(namespace string, li LangIndex) TranslationRequest {
+func (tc *TranslationContainer) Namespace(namespace string, li Language) TranslationRequest {
 	return TranslationRequest{
 		lang:      li,
 		namespace: namespace,
@@ -37,7 +37,7 @@ func (tr TranslationRequest) value(key string) Item {
 			return res
 		}
 
-		if tr.lang = NextLangIndex(tr.lang); tr.lang == Unknown {
+		if tr.lang = NextLanguage(tr.lang); tr.lang == Unknown {
 			break
 		}
 	}

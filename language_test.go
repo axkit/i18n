@@ -8,11 +8,11 @@ import (
 func TestCode(t *testing.T) {
 	resetLangState()
 	codes = []string{"en", "fr", "de"}
-	if got := Code(1); got != "fr" {
+	if got := code(1); got != "fr" {
 		t.Errorf("expected 'fr', got '%s'", got)
 	}
-	if got := Code(10); got != UnknownCode {
-		t.Errorf("expected '%s', got '%s'", UnknownCode, got)
+	if got := code(10); got != UnknownLanguageCode {
+		t.Errorf("expected '%s', got '%s'", UnknownLanguageCode, got)
 	}
 
 }
@@ -20,14 +20,14 @@ func TestCode(t *testing.T) {
 func TestIndex(t *testing.T) {
 	resetLangState()
 	codes = []string{"en", "fr", "de"}
-	if got := Index("fr"); got != 1 {
+	if got := Lookup("fr"); got != 1 {
 		t.Errorf("expected 1, got %d", got)
 	}
-	if got := Index("es"); got != Unknown {
+	if got := Lookup("es"); got != Unknown {
 		t.Errorf("expected Unknown, got %d", got)
 	}
 
-	if en := Index("en"); en.String() != "en" {
+	if en := Lookup("en"); en.String() != "en" {
 		t.Errorf("expected 'en', got '%s'", en)
 	}
 
@@ -36,7 +36,7 @@ func TestIndex(t *testing.T) {
 func TestLangCodes(t *testing.T) {
 	resetLangState()
 	codes = []string{"en", "fr", "de"}
-	if got := LangCodes(); !equalSlices(got, []string{"en", "fr", "de"}) {
+	if got := LanguageCodes(); !equalSlices(got, []string{"en", "fr", "de"}) {
 		t.Errorf("expected ['en', 'fr', 'de'], got %v", got)
 	}
 }
@@ -44,11 +44,11 @@ func TestLangCodes(t *testing.T) {
 func TestNextLangIndex(t *testing.T) {
 	resetLangState()
 	codes = []string{"en", "fr"}
-	nextCode = []LangIndex{1, Unknown}
-	if got := NextLangIndex(0); got != 1 {
+	nextCode = []Language{1, Unknown}
+	if got := NextLanguage(0); got != 1 {
 		t.Errorf("expected 1, got %d", got)
 	}
-	if got := NextLangIndex(10); got != Unknown {
+	if got := NextLanguage(10); got != Unknown {
 		t.Errorf("expected Unknown, got %d", got)
 	}
 }
@@ -71,22 +71,22 @@ func TestGetSetLangIndex(t *testing.T) {
 	tests := []struct {
 		input         []string
 		expectedCodes []string
-		expectedNext  []LangIndex
+		expectedNext  []Language
 	}{
 		{
 			[]string{"zh-Hans-CN", "en", "zh-Hant"},
 			[]string{"zh", "zh-Hans", "zh-Hans-CN", "en", "zh-Hant"},
-			[]LangIndex{-1, 0, 1, -1, 0},
+			[]Language{-1, 0, 1, -1, 0},
 		},
 		{
 			[]string{"en", "zh-Hans-CN", "zh-Hant"},
 			[]string{"en", "zh", "zh-Hans", "zh-Hans-CN", "zh-Hant"},
-			[]LangIndex{-1, -1, 1, 2, 1},
+			[]Language{-1, -1, 1, 2, 1},
 		},
 		{
 			[]string{"zh-Hant", "zh-Hans-CN", "en-US", "en", "en-GB"},
 			[]string{"zh", "zh-Hant", "zh-Hans", "zh-Hans-CN", "en", "en-US", "en-GB"},
-			[]LangIndex{-1, 0, 0, 2, -1, 4, 4},
+			[]Language{-1, 0, 0, 2, -1, 4, 4},
 		},
 	}
 
@@ -94,9 +94,9 @@ func TestGetSetLangIndex(t *testing.T) {
 		resetLangState()
 		t.Run(strings.Join(tt.input, ","), func(t *testing.T) {
 			for _, code := range tt.input {
-				_ = GetSetLangIndex(code)
+				_ = Parse(code)
 			}
-			if gotCodes := LangCodes(); !equalSlices(gotCodes, tt.expectedCodes) {
+			if gotCodes := LanguageCodes(); !equalSlices(gotCodes, tt.expectedCodes) {
 				t.Errorf("expected codes %v, got %v", tt.expectedCodes, gotCodes)
 			}
 			if gotNext := getNextCodesSnapshot(); !equalLanguageIndices(gotNext, tt.expectedNext) {
@@ -115,10 +115,10 @@ func resetLangState() {
 	NoFoundIndex = Unknown
 }
 
-func getNextCodesSnapshot() []LangIndex {
+func getNextCodesSnapshot() []Language {
 	mux.RLock()
 	defer mux.RUnlock()
-	res := make([]LangIndex, len(nextCode))
+	res := make([]Language, len(nextCode))
 	copy(res, nextCode)
 	return res
 }
@@ -137,7 +137,7 @@ func equalSlices(a, b []string) bool {
 }
 
 // equalLanguageIndices is a helper function to compare two LangIndex slices.
-func equalLanguageIndices(a, b []LangIndex) bool {
+func equalLanguageIndices(a, b []Language) bool {
 	if len(a) != len(b) {
 		return false
 	}
