@@ -22,9 +22,12 @@ func (tc *TranslationContainer) Lang(li LangIndex) TranslationRequest {
 }
 
 // Namespace returns a TranslationRequest in a specific namespace.
-func (tr TranslationRequest) Namespace(namespace string) TranslationRequest {
-	tr.namespace = namespace
-	return tr
+func (tc *TranslationContainer) Namespace(namespace string, li LangIndex) TranslationRequest {
+	return TranslationRequest{
+		lang:      li,
+		namespace: namespace,
+		tc:        tc,
+	}
 }
 
 func (tr TranslationRequest) value(key string) Item {

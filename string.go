@@ -35,8 +35,15 @@ func (n String) InLang(li LangIndex, opts ...StringOption) string {
 		return UnknownCode
 	}
 
-	if int(li) >= len(n) {
-		//
+	for {
+		if int(li) >= len(n) {
+			li = NextLangIndex(li)
+		} else {
+			break
+		}
+	}
+
+	if li == Unknown {
 		if NoFoundIndex != Unknown {
 			li = NoFoundIndex
 		} else {

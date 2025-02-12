@@ -197,15 +197,15 @@ func (tc *TranslationContainer) ReadRegisteredFiles() error {
 
 	tc.sortFilesBySuffixPriority()
 
-	for i := range tc.files {
-		items, err := tc.loadFile(tc.files[i].fullName)
+	for _, f := range tc.files {
+		items, err := tc.loadFile(f.fullName)
 		if err != nil {
 			return err
 		}
 
 		key := key{
-			lang:      tc.files[i].lang,
-			namespace: "",
+			lang:      f.lang,
+			namespace: f.namespace,
 		}
 
 		if ti, ok := tc.translations[key]; ok {

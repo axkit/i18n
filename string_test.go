@@ -44,6 +44,10 @@ func TestString(t *testing.T) {
 			t.Errorf("expected '%s', got '%s'", UnknownCode, got)
 		}
 
+		if got := n.InLang(GetSetLangIndex("en-US")); got != "Hello" {
+			t.Errorf("expected '%s', got '%s'", "Hello", got)
+		}
+
 	})
 
 	t.Run("Bytes", func(t *testing.T) {
@@ -88,7 +92,7 @@ func TestString(t *testing.T) {
 
 }
 
-func ExampleTranslation_LocalStorage() {
+func ExampleFileLocalStorage() {
 
 	// Init part
 
@@ -98,7 +102,7 @@ func ExampleTranslation_LocalStorage() {
 
 	fs := NewLocalFileStorage()
 	if err := fs.RegisterFiles("*.t18n", "./testdata"); err != nil {
-		fmt.Errorf("file registration error: %v", err)
+		fmt.Printf("file registration error: %v", err)
 		return
 	}
 
@@ -109,7 +113,7 @@ func ExampleTranslation_LocalStorage() {
 	)
 
 	if err := tc.ReadRegisteredFiles(); err != nil {
-		fmt.Errorf("file registration error: %v", err)
+		fmt.Printf("file registration error: %v", err)
 		return
 	}
 
@@ -120,11 +124,15 @@ func ExampleTranslation_LocalStorage() {
 	// get translation for the language code from the request
 	tr := tc.Lang(requestLi)
 
+	trn := tc.Namespace("customer1", Index("en-US"))
+
 	fmt.Println(tr.Value("%Lift%"))          // from ./testdata/en-GB.t18n
 	fmt.Println(tr.Value("%Save%"))          // from ./testdata/en.t18n
 	fmt.Println(tc.Lang(de).Value("%Save%")) // from ./testdata/de.t18n
+	fmt.Println(trn.Value("%Lift%"))         // from ./testdata/en-US.customer1.t18n
 	// Output:
 	// Elevator
 	// Save
 	// Speichern
+	// Hoist
 }
