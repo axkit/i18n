@@ -123,9 +123,9 @@ func LanguageCodes() []string {
 	return res
 }
 
-// LanguageCount returns last Language.
+// LastLanguage returns last Language.
 // It is used to iterate over all registered languages.
-func LanguageCount() Language {
+func LastLanguage() Language {
 	mux.RLock()
 	defer mux.RUnlock()
 	return Language(len(codes) - 1)
@@ -142,8 +142,8 @@ func NextLanguage(li Language) Language {
 	return nextCode[li]
 }
 
-// Len returns number of supported languages.
-func Len() int {
+// LanguageCount returns number of supported languages.
+func LanguageCount() int {
 	mux.RLock()
 	defer mux.RUnlock()
 	return len(codes)

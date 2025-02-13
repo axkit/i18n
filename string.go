@@ -128,7 +128,7 @@ func ToString(b []byte) (String, error) {
 		return String{}, err
 	}
 
-	n := make(String, LanguageCount()+1)
+	n := make(String, LastLanguage()+1)
 	for i := 0; i < len(n); i++ {
 		n[i] = emptyString
 	}
