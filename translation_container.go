@@ -64,9 +64,16 @@ type TranslationContainer struct {
 type FileStorager interface {
 	//Filenames(mask string, paths ...string) ([]string, error)
 	RegisteredFilenames() []string
-	ExtractFilename(fullname string) (string, error)
-	ParseFilename(filename string) (Language, string)
 	ReadFile(filename string) ([]byte, error)
+}
+
+// FilenameParser is an interface wrapping the methods for parsing filenames.
+//
+// ExtractFilename extracts a filename from a full path.
+// ParseFilename parses a filename and returns a language index and a custom suffix.
+type FilenameParser interface {
+	ExtractFilename(fullname string) (string, error)
+	ParseFilename(name string) (Language, string)
 }
 
 // FileContentParser is an interface wrapping the ParseFileContent method.
@@ -93,6 +100,8 @@ type containerConfig struct {
 
 	storage FileStorager
 
+	filenameParser FilenameParser
+
 	parser FileContentParser
 }
 
@@ -102,6 +111,12 @@ type ContainerOption func(o *containerConfig)
 func WithPrimaryLanguage(li Language) ContainerOption {
 	return func(o *containerConfig) {
 		o.primaryLanguage = li
+	}
+}
+
+func WithFilenameParser(parser FilenameParser) ContainerOption {
+	return func(o *containerConfig) {
+		o.filenameParser = parser
 	}
 }
 
@@ -155,6 +170,7 @@ func NewContainer(opts ...func(o *containerConfig)) *TranslationContainer {
 			storage:         &LocalFileStorage{},
 			parser:          &DefaultParser{},
 			strategy:        ReturnResourceCode,
+			filenameParser:  &DefaultFilenameParser{},
 		},
 	}
 
@@ -168,13 +184,13 @@ func NewContainer(opts ...func(o *containerConfig)) *TranslationContainer {
 func (tc *TranslationContainer) addFiles(fullFileNames ...string) error {
 
 	for _, ffn := range fullFileNames {
-		name, err := tc.cfg.storage.ExtractFilename(ffn)
+		name, err := tc.cfg.filenameParser.ExtractFilename(ffn)
 		if err != nil {
 			return err
 		}
 
 		pfi := file{name: name, fullName: ffn}
-		pfi.lang, pfi.namespace = tc.cfg.storage.ParseFilename(name)
+		pfi.lang, pfi.namespace = tc.cfg.filenameParser.ParseFilename(name)
 		tc.files = append(tc.files, pfi)
 	}
 	return nil
