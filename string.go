@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"unsafe"
 )
 
 // String holds decoded names. Index of the slice calculates by LangIndex.
@@ -109,13 +110,18 @@ func (n *String) Scan(value interface{}) error {
 		return nil
 	}
 
-	v, ok := value.([]byte)
-	if !ok {
-		return fmt.Errorf("Name.Scan: expected []byte, got %T (%q)", value, value)
+	var buf []byte
+	switch v := value.(type) {
+	case []byte:
+		buf = v
+	case string:
+		buf = unsafe.Slice(unsafe.StringData(v), len(v))
+	default:
+		return fmt.Errorf("Name.Scan: expected []byte or string, got %T (%q)", value, value)
 	}
 
 	var err error
-	*n, err = ToString(v)
+	*n, err = ToString(buf)
 	return err
 }
 
